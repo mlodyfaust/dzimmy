@@ -1,0 +1,110 @@
+#include <iostream>
+#include <string>
+
+template <typename T>
+struct Node {
+    T data;
+    Node* next;
+};
+
+template <typename T>
+void showList(const Node<T>* head) {
+    const Node<T>* current = head;
+    while (current != nullptr) {
+        std::cout << current->data << " ";
+        current = current->next;
+    }
+    std::cout << std::endl;
+}
+
+template <typename T>
+Node<T>* arrayToList(const T a[], size_t size) {
+    if (size == 0) return nullptr;
+
+    Node<T>* head = new Node<T>{a[0], nullptr};
+    Node<T>* current = head;
+
+    for (size_t i = 1; i < size; ++i) {
+        current->next = new Node<T>{a[i], nullptr};
+        current = current->next;
+    }
+
+    return head;
+}
+
+template <typename T, typename Pred>
+Node<T>* extract(Node<T>*& head, Pred pred) {
+    Node<T>* extractedHead = nullptr;
+    Node<T>* extractedTail = nullptr;
+    Node<T>* remainingHead = nullptr;
+    Node<T>* remainingTail = nullptr;
+
+    Node<T>* current = head;
+    while (current != nullptr) {
+        if (pred(current->data)) {
+            if (extractedHead == nullptr) {
+                extractedHead = current;
+                extractedTail = current;
+            } else {
+                extractedTail->next = current;
+                extractedTail = current;
+            }
+        } else {
+            if (remainingHead == nullptr) {
+                remainingHead = current;
+                remainingTail = current;
+            } else {
+                remainingTail->next = current;
+                remainingTail = current;
+            }
+        }
+        current = current->next;
+    }
+
+    if (extractedTail != nullptr) extractedTail->next = nullptr;
+    if (remainingTail != nullptr) remainingTail->next = nullptr;
+
+    head = remainingHead;
+    return extractedHead;
+}
+
+template <typename T>
+void deleteList(Node<T>*& head) {
+    Node<T>* current = head;
+    while (current != nullptr) {
+        Node<T>* next = current->next;
+        std::cout << "DEL " << current->data << "; ";
+        delete current;
+        current = next;
+    }
+    head = nullptr;
+    std::cout << std::endl;
+}
+
+bool isLong(const std::string& s) { return s.size() >= 5; }
+
+int main() {
+    int tabi[] = { 2, 1, 4, 3, 6, 5, 7, 8 };
+    size_t sizei = sizeof(tabi)/sizeof(tabi[0]);
+    Node<int>* listAi = arrayToList(tabi, sizei);
+    showList(listAi);
+    Node<int>* listBi = extract(listAi,
+    [](int n) {
+        return n % 2 == 0;
+    });
+    showList(listBi);
+    showList(listAi);
+    deleteList(listBi);
+    deleteList(listAi);
+
+    std::string tabs[]{ "Kasia", "Ola", "Ala",
+                       "Zosia", "Ela", "Basia" };
+    size_t sizes = sizeof(tabs)/sizeof(tabs[0]);
+    Node<std::string>* listAs = arrayToList(tabs, sizes);
+    showList(listAs);
+    Node<std::string>* listBs = extract(listAs, isLong);
+    showList(listBs);
+    showList(listAs);
+    deleteList(listBs);
+    deleteList(listAs);
+}
